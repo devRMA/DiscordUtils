@@ -4,15 +4,15 @@ import youtube_dl
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 ydl = youtube_dl.YoutubeDL(
-    {"format": "bestaudio/best",
-     "restrictfilenames": True,
-     "noplaylist": True,
-     "nocheckcertificate": True,
-     "ignoreerrors": True,
-     "logtostderr": False,
-     "quiet": True,
-     "no_warnings": True,
-     "source_address": "0.0.0.0"
+    {'format': 'bestaudio/best',
+     'restrictfilenames': True,
+     'noplaylist': True,
+     'nocheckcertificate': True,
+     'ignoreerrors': True,
+     'logtostderr': False,
+     'quiet': True,
+     'no_warnings': True,
+     'source_address': '0.0.0.0'
      }
 )
 
@@ -30,75 +30,75 @@ class NotPlaying(Exception):
 
 
 async def ytbettersearch(query):
-    url = f"https://www.youtube.com/results?search_query={query}"
+    url = f'https://www.youtube.com/results?search_query={query}'
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             html = await resp.text()
     index = html.find('watch?v')
-    url = ""
+    url = ''
     while True:
         char = html[index]
         if char == '"':
             break
         url += char
         index += 1
-    url = f"https://www.youtube.com/{url}"
+    url = f'https://www.youtube.com/{url}'
     return url
 
 
 async def get_video_data(url, search, bettersearch, loop):
     if not search and not bettersearch:
         data = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=False))
-        source = data["url"]
-        url = "https://www.youtube.com/watch?v=" + data["id"]
-        title = data["title"]
-        description = data["description"]
-        likes = data["like_count"]
-        dislikes = data["dislike_count"]
-        views = data["view_count"]
-        duration = data["duration"]
-        thumbnail = data["thumbnail"]
-        channel = data["uploader"]
-        channel_url = data["uploader_url"]
+        source = data['url']
+        url = 'https://www.youtube.com/watch?v=' + data['id']
+        title = data['title']
+        description = data['description']
+        likes = data['like_count']
+        dislikes = data['dislike_count']
+        views = data['view_count']
+        duration = data['duration']
+        thumbnail = data['thumbnail']
+        channel = data['uploader']
+        channel_url = data['uploader_url']
         return Song(source, url, title, description, views, duration, thumbnail, channel, channel_url, False)
     else:
         if bettersearch:
             url = await ytbettersearch(url)
             data = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=False))
-            source = data["url"]
-            url = "https://www.youtube.com/watch?v=" + data["id"]
-            title = data["title"]
-            description = data["description"]
-            likes = data["like_count"]
-            dislikes = data["dislike_count"]
-            views = data["view_count"]
-            duration = data["duration"]
-            thumbnail = data["thumbnail"]
-            channel = data["uploader"]
-            channel_url = data["uploader_url"]
+            source = data['url']
+            url = 'https://www.youtube.com/watch?v=' + data['id']
+            title = data['title']
+            description = data['description']
+            likes = data['like_count']
+            dislikes = data['dislike_count']
+            views = data['view_count']
+            duration = data['duration']
+            thumbnail = data['thumbnail']
+            channel = data['uploader']
+            channel_url = data['uploader_url']
             return Song(source, url, title, description, views, duration, thumbnail, channel, channel_url, False)
         elif search:
             ytdl = youtube_dl.YoutubeDL(
-                {"format": "bestaudio/best", "restrictfilenames": True, "noplaylist": True, "nocheckcertificate": True,
-                 "ignoreerrors": True, "logtostderr": False, "quiet": True, "no_warnings": True,
-                 "default_search": "auto", "source_address": "0.0.0.0"})
+                {'format': 'bestaudio/best', 'restrictfilenames': True, 'noplaylist': True, 'nocheckcertificate': True,
+                 'ignoreerrors': True, 'logtostderr': False, 'quiet': True, 'no_warnings': True,
+                 'default_search': 'auto', 'source_address': '0.0.0.0'})
             data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
             try:
-                data = data["entries"][0]
+                data = data['entries'][0]
             except KeyError:
                 pass
             del ytdl
-            source = data["url"]
-            url = "https://www.youtube.com/watch?v=" + data["id"]
-            title = data["title"]
-            description = data["description"]
-            likes = data["like_count"]
-            dislikes = data["dislike_count"]
-            views = data["view_count"]
-            duration = data["duration"]
-            thumbnail = data["thumbnail"]
-            channel = data["uploader"]
-            channel_url = data["uploader_url"]
+            source = data['url']
+            url = 'https://www.youtube.com/watch?v=' + data['id']
+            title = data['title']
+            description = data['description']
+            likes = data['like_count']
+            dislikes = data['dislike_count']
+            views = data['view_count']
+            duration = data['duration']
+            thumbnail = data['thumbnail']
+            channel = data['uploader']
+            channel_url = data['uploader_url']
             return Song(source, url, title, description, views, duration, thumbnail, channel, channel_url, False)
 
 
@@ -133,14 +133,14 @@ class Music(object):
 
     def create_player(self, ctx, **kwargs):
         if not ctx.voice_client:
-            raise NotConnectedToVoice("Cannot create the player because bot is not connected to voice")
+            raise NotConnectedToVoice('Cannot create the player because bot is not connected to voice')
         player = MusicPlayer(ctx, self, **kwargs)
         self.players.append(player)
         return player
 
     def get_player(self, **kwargs):
-        guild = kwargs.get("guild_id")
-        channel = kwargs.get("channel_id")
+        guild = kwargs.get('guild_id')
+        channel = kwargs.get('channel_id')
         for player in self.players:
             if guild and channel and player.ctx.guild.id == guild and player.voice.channel.id == channel:
                 return player
@@ -162,15 +162,15 @@ class MusicPlayer(object):
             self.music.queue[self.ctx.guild.id] = []
         self.after_func = check_queue
         self.on_play_func = self.on_queue_func = self.on_skip_func = self.on_stop_func = self.on_pause_func = self.on_resume_func = self.on_loop_toggle_func = self.on_volume_change_func = self.on_remove_from_queue_func = None
-        ffmpeg_error = kwargs.get("ffmpeg_error_betterfix", kwargs.get("ffmpeg_error_fix"))
-        if ffmpeg_error and "ffmpeg_error_betterfix" in kwargs.keys():
-            self.ffmpeg_opts = {"options": "-vn -loglevel quiet -hide_banner -nostats",
-                                "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 0 -nostdin"}
+        ffmpeg_error = kwargs.get('ffmpeg_error_betterfix', kwargs.get('ffmpeg_error_fix'))
+        if ffmpeg_error and 'ffmpeg_error_betterfix' in kwargs.keys():
+            self.ffmpeg_opts = {'options': '-vn -loglevel quiet -hide_banner -nostats',
+                                'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 0 -nostdin'}
         elif ffmpeg_error:
-            self.ffmpeg_opts = {"options": "-vn",
-                                "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 0 -nostdin"}
+            self.ffmpeg_opts = {'options': '-vn',
+                                'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 0 -nostdin'}
         else:
-            self.ffmpeg_opts = {"options": "-vn", "before_options": "-nostdin"}
+            self.ffmpeg_opts = {'options': '-vn', 'before_options': '-nostdin'}
 
     def disable(self):
         self.music.players.remove(self)
@@ -222,9 +222,9 @@ class MusicPlayer(object):
 
     async def skip(self, force=False):
         if len(self.music.queue[self.ctx.guild.id]) == 0:
-            raise NotPlaying("Cannot loop because nothing is being played")
+            raise NotPlaying('Cannot loop because nothing is being played')
         elif not len(self.music.queue[self.ctx.guild.id]) > 1 and not force:
-            raise EmptyQueue("Cannot skip because queue is empty")
+            raise EmptyQueue('Cannot skip because queue is empty')
         else:
             old = self.music.queue[self.ctx.guild.id][0]
             old.is_looping = False if old.is_looping else False
@@ -245,7 +245,7 @@ class MusicPlayer(object):
             self.voice.stop()
             self.music.players.remove(self)
         except:
-            raise NotPlaying("Cannot loop because nothing is being played")
+            raise NotPlaying('Cannot loop because nothing is being played')
         if self.on_stop_func:
             await self.on_stop_func(self.ctx)
 
@@ -254,7 +254,7 @@ class MusicPlayer(object):
             self.voice.pause()
             song = self.music.queue[self.ctx.guild.id][0]
         except:
-            raise NotPlaying("Cannot pause because nothing is being played")
+            raise NotPlaying('Cannot pause because nothing is being played')
         if self.on_pause_func:
             await self.on_pause_func(self.ctx, song)
         return song
@@ -264,7 +264,7 @@ class MusicPlayer(object):
             self.voice.resume()
             song = self.music.queue[self.ctx.guild.id][0]
         except:
-            raise NotPlaying("Cannot resume because nothing is being played")
+            raise NotPlaying('Cannot resume because nothing is being played')
         if self.on_resume_func:
             await self.on_resume_func(self.ctx, song)
         return song
@@ -273,7 +273,7 @@ class MusicPlayer(object):
         try:
             return self.music.queue[self.ctx.guild.id]
         except KeyError:
-            raise EmptyQueue("Queue is empty")
+            raise EmptyQueue('Queue is empty')
 
     def now_playing(self):
         try:
@@ -285,7 +285,7 @@ class MusicPlayer(object):
         try:
             song = self.music.queue[self.ctx.guild.id][0]
         except:
-            raise NotPlaying("Cannot loop because nothing is being played")
+            raise NotPlaying('Cannot loop because nothing is being played')
         if not song.is_looping:
             song.is_looping = True
         else:
@@ -299,7 +299,7 @@ class MusicPlayer(object):
         try:
             song = self.music.queue[self.ctx.guild.id][0]
         except:
-            raise NotPlaying("Cannot loop because nothing is being played")
+            raise NotPlaying('Cannot loop because nothing is being played')
         if self.on_volume_change_func:
             await self.on_volume_change_func(self.ctx, song, vol)
         return (song, vol)
@@ -309,7 +309,7 @@ class MusicPlayer(object):
             try:
                 song = self.music.queue[self.ctx.guild.id][0]
             except:
-                raise NotPlaying("Cannot loop because nothing is being played")
+                raise NotPlaying('Cannot loop because nothing is being played')
             await self.skip(force=True)
             return song
         song = self.music.queue[self.ctx.guild.id][index]

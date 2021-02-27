@@ -16,6 +16,7 @@ async def paginate(ctx):
     paginator = DiscordUtils.Pagination.AutoEmbedPaginator(ctx)
     embeds = [embed1, embed2, embed3]
     await paginator.run(embeds)
+    # if you want, you can pass reply=True to reply the ctx and mention_author=False if you don't want to mention the author
 ```
 
 ### DiscordUtils.Pagination.CustomEmbedPaginator
@@ -33,7 +34,7 @@ async def paginate(ctx):
     paginator.add_reaction(bot.get_emoji(1234567890), "last")
     paginator.add_reaction(bot.get_emoji(0987654321), f"remove {bot.get_emoji(1234567890)}")
     embeds = [embed1, embed2, embed3]
-    await paginator.run(embeds)
+    await paginator.run(embeds, reply=True, mention_author=False)
 ```
 
 ### DiscordUtils.InviteTracker
@@ -168,4 +169,4 @@ async def remove(ctx, index):
 **[PyPi](https://pypi.discordutils.gq)**
 
 # Support
-DM/PM `toxic_recker#6764` on Discord
+DM/PM `Sl4ker#1985` on Discord

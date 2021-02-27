@@ -68,7 +68,6 @@ class InviteTracker(object):
             return
 
     async def fetch_inviter(self, member):
-        invited_by = None
         invs = {}
         try:
             new_invites = await member.guild.invites()

@@ -1,5 +1,7 @@
 import asyncio
 
+from discord import AllowedMentions
+
 
 class AutoEmbedPaginator(object):
     def __init__(self, ctx, **kwargs):
@@ -12,15 +14,17 @@ class AutoEmbedPaginator(object):
         self.control_emojis = ('⏮️', '⏪', '🔐', '⏩', '⏭️')
         self.timeout = int(kwargs.get("timeout", 60))
 
-    async def run(self, embeds, send_to=None):
+    async def run(self, embeds, send_to=None, reply=False, mention_author=False):
         if not send_to:
             send_to = self.ctx
+        reference = self.ctx.message if send_to == self.ctx and reply else None
+        allowed_mentions = AllowedMentions(replied_user=mention_author)
         wait_for = self.ctx.author if send_to == self.ctx else send_to
         if not self.embeds:
             self.embeds = embeds
         if self.auto_footer:
             self.embeds[0].set_footer(text=f'({self.current_page + 1}/{len(self.embeds)})')
-        msg = await send_to.send(embed=self.embeds[0])
+        msg = await send_to.send(embed=self.embeds[0], reference=reference, mention_author=mention_author)
         for emoji in self.control_emojis:
             await msg.add_reaction(emoji)
         msg = await msg.channel.fetch_message(msg.id)
@@ -47,7 +51,7 @@ class AutoEmbedPaginator(object):
                         await msg.remove_reaction(str(reaction.emoji), user)
                     if self.auto_footer:
                         self.embeds[0].set_footer(text=f'({self.current_page + 1}/{len(self.embeds)})')
-                    await msg.edit(embed=self.embeds[0])
+                    await msg.edit(embed=self.embeds[0], allowed_mentions=allowed_mentions)
             elif str(reaction.emoji) == self.control_emojis[1]:
                 if self.current_page > 0:
                     self.current_page = self.current_page - 1
@@ -56,7 +60,7 @@ class AutoEmbedPaginator(object):
                         await msg.remove_reaction(str(reaction.emoji), user)
                     if self.auto_footer:
                         self.embeds[self.current_page].set_footer(text=f'({self.current_page + 1}/{len(self.embeds)})')
-                    await msg.edit(embed=self.embeds[self.current_page])
+                    await msg.edit(embed=self.embeds[self.current_page], allowed_mentions=allowed_mentions)
             elif str(reaction.emoji) == self.control_emojis[2]:
                 self.current_page = 0
                 for reaction in msg.reactions:
@@ -72,7 +76,7 @@ class AutoEmbedPaginator(object):
                         await msg.remove_reaction(str(reaction.emoji), user)
                     if self.auto_footer:
                         self.embeds[self.current_page].set_footer(text=f'({self.current_page + 1}/{len(self.embeds)})')
-                    await msg.edit(embed=self.embeds[self.current_page])
+                    await msg.edit(embed=self.embeds[self.current_page], allowed_mentions=allowed_mentions)
             elif str(reaction.emoji) == self.control_emojis[4]:
                 if self.current_page < (len(self.embeds) - 1):
                     self.current_page = len(self.embeds) - 1
@@ -81,7 +85,7 @@ class AutoEmbedPaginator(object):
                     if self.auto_footer:
                         self.embeds[len(self.embeds) - 1].set_footer(text=f'({self.current_page + 1}/'
                                                                           f'{len(self.embeds)})')
-                    await msg.edit(embed=self.embeds[len(self.embeds) - 1])
+                    await msg.edit(embed=self.embeds[len(self.embeds) - 1], allowed_mentions=allowed_mentions)
 
 
 class CustomEmbedPaginator(object):
@@ -125,14 +129,16 @@ class CustomEmbedPaginator(object):
         self.control_emojis = []
         self.control_commands = []
 
-    async def run(self, embeds, send_to=None):
+    async def run(self, embeds, send_to=None, reply=False, mention_author=False):
         self.embeds = embeds
         if not send_to:
             send_to = self.ctx
+        reference = self.ctx.message if send_to == self.ctx and reply else None
+        allowed_mentions = AllowedMentions(replied_user=mention_author)
         wait_for = self.ctx.author if send_to == self.ctx else send_to
         if self.auto_footer:
             self.embeds[0].set_footer(text=f'({self.current_page + 1}/{len(self.embeds)})')
-        msg = await send_to.send(embed=self.embeds[0])
+        msg = await send_to.send(embed=self.embeds[0], reference=reference, mention_author=mention_author)
         for emoji in self.control_emojis:
             await msg.add_reaction(emoji)
         msg = await msg.channel.fetch_message(msg.id)
@@ -164,7 +170,7 @@ class CustomEmbedPaginator(object):
                                 await msg.remove_reaction(str(reaction.emoji), user)
                             if self.auto_footer:
                                 self.embeds[0].set_footer(text=f'({self.current_page + 1}/{len(self.embeds)})')
-                            await msg.edit(embed=self.embeds[0])
+                            await msg.edit(embed=self.embeds[0], allowed_mentions=allowed_mentions)
                     elif cmd.lower() == "last":
                         if self.current_page < (len(self.embeds) - 1):
                             self.current_page = len(self.embeds) - 1
@@ -173,7 +179,7 @@ class CustomEmbedPaginator(object):
                             if self.auto_footer:
                                 self.embeds[len(self.embeds) - 1].set_footer(
                                     text=f'({self.current_page + 1}/{len(self.embeds)})')
-                            await msg.edit(embed=self.embeds[len(self.embeds) - 1])
+                            await msg.edit(embed=self.embeds[len(self.embeds) - 1], allowed_mentions=allowed_mentions)
                     elif cmd.lower() == "next":
                         if self.current_page < (len(self.embeds) - 1):
                             self.current_page += 1
@@ -184,7 +190,7 @@ class CustomEmbedPaginator(object):
                             if self.auto_footer:
                                 self.embeds[self.current_page].set_footer(
                                     text=f'({self.current_page + 1}/{len(self.embeds)})')
-                            await msg.edit(embed=self.embeds[self.current_page])
+                            await msg.edit(embed=self.embeds[self.current_page], allowed_mentions=allowed_mentions)
                     elif cmd.lower() == "back":
                         if self.current_page > 0:
                             self.current_page = self.current_page - 1
@@ -194,7 +200,7 @@ class CustomEmbedPaginator(object):
                             if self.auto_footer:
                                 self.embeds[self.current_page].set_footer(
                                     text=f'({self.current_page + 1}/{len(self.embeds)})')
-                            await msg.edit(embed=self.embeds[self.current_page])
+                            await msg.edit(embed=self.embeds[self.current_page], allowed_mentions=allowed_mentions)
                     elif cmd.lower() == "delete":
                         self.current_page = 0
                         await msg.delete()
@@ -218,7 +224,7 @@ class CustomEmbedPaginator(object):
                                 await msg.remove_reaction(str(reaction.emoji), user)
                             if self.auto_footer:
                                 self.embeds[self.current_page].set_footer(text=f'({pg + 1}/{len(self.embeds)})')
-                            await msg.edit(embed=self.embeds[pg])
+                            await msg.edit(embed=self.embeds[pg], allowed_mentions=allowed_mentions)
                     elif cmd.startswith("remove"):
                         things = cmd.split()
                         things.pop(0)
